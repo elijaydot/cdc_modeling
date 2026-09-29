@@ -1,0 +1,60 @@
+cdc_marketing:
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+
+  meta:
+    base: &base
+      type: databricks
+      threads: 8
+    base_auth: &base_auth
+      type: databricks
+      auth_type: oauth
+      client_id: "{{ env_var('DBX_ID_APPLICATION_ID') }}"
+      client_secret: "{{ env_var('DBX_SECRET') }}"
+      threads: 8
+      connect_retries: 3
+      retry_all: true
+
+  outputs:
+    dev: &dev_service_account
+      <<: *base
+      host: dbc-4ad3b83f-b60a.cloud.databricks.com
+      token: "{{ env_var('DATABRICKS_PAT_TOKEN') }}"
+      catalog: "{{ env_var('DEV_CATALOG') }}"
+      schema: "{{ env_var('DEV_SCHEMA') }}"
+      http_path: "{{ env_var('DEV_HTTP_PATH') }}"
+
+    ci: &ci_service_account
+      <<: *base_auth
+      catalog:
+      schema: "{{ env_var('DEV_SCHEMA') }}"
+      host: dbc-4ad3b83f-b60a.cloud.databricks.com
+      http_path:
+
+    staging: &staging_service_account
+      <<: *ci_service_account
+      catalog:
+      schema:
+      http_path:
+
+    production: &production_service_account
+      <<: *base_auth
+      catalog:
+      schema:
+      host: dbc-4ad3b83f-b60a.cloud.databricks.com
+      http_path:
+
+
+elementary:
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+  outputs:
+    dev:
+      <<: *dev_service_account
+    production:
+      <<: *production_service_account
+      catalog:
+      schema: elementary
+
+    staging:
+      <<: *staging_service_account
+      catalog:
+      schema: elementary
