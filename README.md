@@ -59,7 +59,7 @@ The wording in this table is deliberate:
 | Production Service Principal | 🟡 Configured | OAuth client credentials are required by the production target; a successful production run is not evidenced in this repository |
 | Unity Catalog permissions | 🟡 Guidance documented | Grant examples are provided, but permissions must be applied and verified in the real workspace |
 | Materialization strategy | ✅ Implemented | Views for staging/intermediate models; tables for marts |
-| CI/CD workflow | 🟡 Ready for GitHub verification | The CI command passes locally and the workflow is in the repository-root `.github/workflows/` directory; its first GitHub-hosted run is pending |
+| CI/CD workflow | ✅ Verified | The repository-root workflow completed successfully on the feature pull request using the CI Service Principal and isolated `cdc_ci` schema |
 | README with architecture & decisions | ✅ Implemented | This document |
 
 ---
@@ -426,7 +426,7 @@ The Elementary HTML report is written to `edr_target/elementary_report.html`.
 | Target | Purpose | Auth method | Repository status |
 |--------|---------|-------------|-------------------|
 | `dev` | Local development | Personal Access Token | Used to generate the documented development artifacts |
-| `ci` | Pull-request validation in isolated schema `cdc_ci` | Service Principal (OAuth) | Full local CI-target build verified: 15 models and 69 data tests passed |
+| `ci` | Pull-request validation in isolated schema `cdc_ci` | Service Principal (OAuth) | Local and GitHub-hosted pull-request builds completed successfully |
 | `staging` | Pre-production validation | Service Principal (OAuth) | Profile configured; runtime verification pending |
 | `production` | Consumer-facing analytical models | Service Principal (OAuth) | Profile configured with no PAT; runtime verification pending |
 
@@ -469,7 +469,7 @@ If `cdc_marts` does not yet exist, it must first be created by an owner or by a 
 
 ## 9. CI/CD Outline
 
-The prepared GitHub Actions workflow demonstrates the intended validation flow:
+The GitHub Actions workflow implements the intended validation flow:
 
 1. Developer pushes a feature branch
 2. Pull Request is opened
@@ -477,9 +477,9 @@ The prepared GitHub Actions workflow demonstrates the intended validation flow:
 4. Model builds and dbt tests must pass
 5. Merge only after validation succeeds
 
-The current workflow contains the CI job only; it does **not** contain a production deployment job. It is stored at the repository-root `.github/workflows/dbt_ci.yml`, where GitHub Actions will discover it after the changes are committed and pushed.
+The current workflow contains the CI job only; it does **not** contain a production deployment job. It is stored at the repository-root `.github/workflows/dbt_ci.yml` and has completed successfully on the feature pull request.
 
-The CI profile has been verified with Service Principal authentication using both `dbt debug --target ci` and a full project build. The isolated build completed successfully with **3 table models, 12 view models, and 69 data tests**: `PASS=86`, `WARN=0`, `ERROR=0`, `SKIP=0`. This validates the CI command and Databricks permissions, but the same command still needs to be exercised by GitHub Actions.
+The CI profile has been verified with Service Principal authentication using `dbt debug --target ci`, a full local project build, and the GitHub-hosted pull-request workflow. The isolated local build completed successfully with **3 table models, 12 view models, and 69 data tests**: `PASS=86`, `WARN=0`, `ERROR=0`, `SKIP=0`. The successful pull-request check confirms that GitHub Actions can also install the project, authenticate to Databricks, build the models, and run the test suite.
 
 CI builds select `package:cdc_marketing`, which validates this project without rebuilding Elementary’s internal package models. Elementary remains available for observability reporting through its dedicated profile and report command.
 
@@ -574,9 +574,9 @@ Checked items are supported by repository code or generated development artifact
 - [x] CI workflow placed in the repository-root `.github/workflows/` directory
 - [x] CI Service Principal connection verified with `dbt debug --target ci`
 - [x] Full local CI-target build passed: 15 models and 69 data tests
+- [x] GitHub Actions pull-request CI completed successfully
 - [x] README contains setup, architecture and decision rationale
 - [x] Final model supports the required spend, impression, click, CTR, CPC and CPM questions
-- [ ] Successful CI `dbt build` run recorded through GitHub Actions
 - [ ] Successful staging target run recorded
 - [ ] Successful production target run recorded with the Service Principal
 - [ ] Unity Catalog grants applied and verified for the real identities
@@ -588,14 +588,13 @@ Checked items are supported by repository code or generated development artifact
 
 These are intentionally practical next steps rather than promises that the project has already completed:
 
-1. Commit and push the repository-root CI workflow, then verify its first pull-request run.
-2. Validate the `staging` and `production` targets with their protected environment values.
-3. Apply and verify the Unity Catalog grants for the real developer and Service Principal identities.
-4. Add a protected production deployment job only after CI and staging are stable.
-5. Introduce incremental processing when data volume and refresh frequency justify the additional logic.
-6. Introduce dbt snapshots if point-in-time hierarchy analysis becomes a requirement.
-7. Wire Elementary alerts into a team notification channel.
-8. Add a thin semantic layer, such as dbt MetricFlow, if BI or AI consumers need governed metric definitions.
+1. Validate the `staging` and `production` targets with their protected environment values.
+2. Apply and verify the Unity Catalog grants for the real developer and Service Principal identities.
+3. Add a protected production deployment job only after CI and staging are stable.
+4. Introduce incremental processing when data volume and refresh frequency justify the additional logic.
+5. Introduce dbt snapshots if point-in-time hierarchy analysis becomes a requirement.
+6. Wire Elementary alerts into a team notification channel.
+7. Add a thin semantic layer, such as dbt MetricFlow, if BI or AI consumers need governed metric definitions.
 
 ---
 
