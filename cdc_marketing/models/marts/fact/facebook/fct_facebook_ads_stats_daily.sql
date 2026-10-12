@@ -14,8 +14,8 @@ formatted AS (
         ad_id,
         -- Metrics
         ad_spend,
-       -- ad_impressions,
-       -- ad_clicks,
+        ad_impressions,
+        ad_clicks,
         -- Metadata
         ad_date
     FROM

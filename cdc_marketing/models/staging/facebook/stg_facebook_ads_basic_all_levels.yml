@@ -1,12 +1,57 @@
+version: 2
+
 models:
   - name: stg_facebook_ads_basic_all_levels
-    description: Facebook daily stats aggregated at the ad level
+    description: >
+      Cleaned daily performance metrics from Facebook Ads.
+      Grain: one row per ad_id + ad_date.
+      Dirty string values such as 'null' are converted to real NULLs.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - ad_date
-            - ad_id
+          arguments:
+            combination_of_columns:
+              - ad_id
+              - ad_date
     columns:
       - name: ad_id
+        description: Facebook ad identifier
         tests:
           - not_null
+
+      - name: account_id
+        description: Facebook account identifier
+        tests:
+          - not_null
+
+      - name: ad_spend
+        description: Amount spent on the ad on that day (in account currency)
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: ad_impressions
+        description: Number of impressions for the ad on that day
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: ad_clicks
+        description: Number of clicks for the ad on that day
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: ad_date
+        description: Performance date
+        tests:
+          - not_null
+
+      - name: platform
+        description: Advertising platform (always 'facebook' in this model)
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['facebook']

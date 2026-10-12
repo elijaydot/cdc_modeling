@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: int_snapchat_ads_details
+    description: >
+      Latest version of Snapchat ads joined with their ad group and campaign.
+      Grain: one row per ad_id.
+    columns:
+      - name: ad_id
+        description: Snapchat ad identifier
+        tests:
+          - not_null
+          - unique
+
+      - name: ad_group_id
+        description: Parent ad group identifier
+
+      - name: campaign_id
+        description: Parent campaign identifier
+
+      - name: account_id
+        description: Snapchat account identifier
+
+      - name: ad_name
+        description: Ad name
+
+      - name: ad_group_name
+        description: Ad group name
+
+      - name: campaign_name
+        description: Campaign name
+
+      - name: channel_name
+        description: Marketing channel
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Paid Social']
+
+      - name: platform
+        description: Advertising platform
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapchat']
+
+      - name: data_src
+        description: Source system

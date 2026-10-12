@@ -3,5 +3,9 @@ target/
 dbt_packages/
 logs/
 .env
+.env.template
 .venv/
 .user.yml
+*.code-workspace
+.profiles.yml
+*.log

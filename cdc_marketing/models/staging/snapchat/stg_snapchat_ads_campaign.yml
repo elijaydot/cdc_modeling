@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_snapchat_ads_campaign
+    description: Cleaned Snapchat campaign dimension.
+    columns:
+      - name: campaign_id
+        description: Snapchat campaign identifier
+        tests:
+          - not_null
+          - unique
+
+      - name: account_id
+        description: Snapchat account identifier
+
+      - name: campaign_name
+        description: Campaign name
+
+      - name: platform
+        description: Advertising platform
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapchat']

@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_snapchat_ads_adgroup
+    description: >
+      Cleaned Snapchat ad group history.
+      Note: ad_group_id is not unique because the source contains historical versions.
+      Latest version will be selected in the intermediate layer.
+    columns:
+      - name: ad_group_id
+        description: Snapchat ad group identifier
+        tests:
+          - not_null
+
+      - name: campaign_id
+        description: Parent campaign identifier
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_snapchat_ads_campaign')
+                field: campaign_id
+
+      - name: ad_group_name
+        description: Ad group name
+
+      - name: ad_group_updated_at
+        description: Last update timestamp of this version
+
+      - name: platform
+        description: Advertising platform
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapchat']

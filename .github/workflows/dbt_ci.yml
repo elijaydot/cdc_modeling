@@ -1,0 +1,47 @@
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  dbt-build-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: cdc_marketing
+
+    env:
+      DBT_TARGET: ci
+      DBX_ID_APPLICATION_ID: ${{ secrets.DBX_ID_APPLICATION_ID }}
+      DBX_SECRET: ${{ secrets.DBX_SECRET }}
+      CI_CATALOG: bronze_production
+      CI_SCHEMA: cdc_ci
+      CI_HTTP_PATH: ${{ secrets.CI_HTTP_PATH }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install project dependencies
+        run: uv sync
+
+      - name: Install dbt packages
+        run: uv run dbt deps
+
+      - name: Validate dbt connection
+        run: uv run dbt debug --profiles-dir . --target ci
+
+      - name: Build and test project
+        run: uv run dbt build --profiles-dir . --target ci --select package:cdc_marketing

@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: stg_snapchat_ads_stats
+    description: >
+      Cleaned daily performance metrics from Snapchat Ads.
+      Grain: one row per ad_detail_id + ad_date + ad_country.
+      This is a country-level breakdown of ad performance.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ad_detail_id
+              - ad_date
+              - ad_country
+    columns:
+      - name: ad_detail_id
+        description: Snapchat ad detail identifier
+        tests:
+          - not_null
+
+      - name: ad_country
+        description: Country code for the performance breakdown
+        tests:
+          - not_null
+
+      - name: ad_spend
+        description: Amount spent on the ad on that day in that country
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: ad_impressions
+        description: Number of impressions
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: ad_clicks
+        description: Number of clicks
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: ad_date
+        description: Performance date
+        tests:
+          - not_null
+
+      - name: platform
+        description: Advertising platform (always 'snapchat' in this model)
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapchat']

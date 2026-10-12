@@ -5,56 +5,86 @@ cdc_marketing:
     base: &base
       type: databricks
       threads: 8
+      host: dbc-4ad3b83f-b60a.cloud.databricks.com
+      connect_retries: 3
+      retry_all: true
+
     base_auth: &base_auth
       type: databricks
       auth_type: oauth
       client_id: "{{ env_var('DBX_ID_APPLICATION_ID') }}"
       client_secret: "{{ env_var('DBX_SECRET') }}"
       threads: 8
+      host: dbc-4ad3b83f-b60a.cloud.databricks.com
       connect_retries: 3
       retry_all: true
 
   outputs:
-    dev: &dev_service_account
+    # --------------------------------------------------
+    # Local development – uses Personal Access Token
+    # --------------------------------------------------
+    dev:
       <<: *base
-      host: dbc-4ad3b83f-b60a.cloud.databricks.com
       token: "{{ env_var('DATABRICKS_PAT_TOKEN') }}"
-      catalog: "{{ env_var('DEV_CATALOG') }}"
-      schema: "{{ env_var('DEV_SCHEMA') }}"
+      catalog: "{{ env_var('DEV_CATALOG', 'bronze_production') }}"
+      schema: "{{ env_var('DEV_SCHEMA', 'cdc_staging') }}"
       http_path: "{{ env_var('DEV_HTTP_PATH') }}"
 
-    ci: &ci_service_account
+    # --------------------------------------------------
+    # CI – Service Principal (OAuth)
+    # --------------------------------------------------
+    ci:
       <<: *base_auth
-      catalog:
-      schema: "{{ env_var('DEV_SCHEMA') }}"
-      host: dbc-4ad3b83f-b60a.cloud.databricks.com
-      http_path:
+      catalog: "{{ env_var('CI_CATALOG', 'bronze_production') }}"
+      schema: "{{ env_var('CI_SCHEMA', 'cdc_ci') }}"
+      http_path: "{{ env_var('CI_HTTP_PATH') }}"
 
-    staging: &staging_service_account
-      <<: *ci_service_account
-      catalog:
-      schema:
-      http_path:
-
-    production: &production_service_account
+    # --------------------------------------------------
+    # Staging – Service Principal (OAuth)
+    # --------------------------------------------------
+    staging:
       <<: *base_auth
-      catalog:
-      schema:
-      host: dbc-4ad3b83f-b60a.cloud.databricks.com
-      http_path:
+      catalog: "{{ env_var('STAGING_CATALOG', 'bronze_production') }}"
+      schema: "{{ env_var('STAGING_SCHEMA', 'cdc_staging') }}"
+      http_path: "{{ env_var('STAGING_HTTP_PATH') }}"
+
+    # --------------------------------------------------
+    # Production – Service Principal (OAuth) – NO PAT
+    # --------------------------------------------------
+    production:
+      <<: *base_auth
+      catalog: "{{ env_var('PROD_CATALOG', 'bronze_production') }}"
+      schema: "{{ env_var('PROD_SCHEMA', 'cdc_marts') }}"
+      http_path: "{{ env_var('PROD_HTTP_PATH') }}"
 
 
+# --------------------------------------------------
+# Elementary profile (uses same targets)
+# --------------------------------------------------
 elementary:
   target: "{{ env_var('DBT_TARGET', 'dev') }}"
   outputs:
     dev:
-      <<: *dev_service_account
-    production:
-      <<: *production_service_account
-      catalog:
+      <<: *base
+      token: "{{ env_var('DATABRICKS_PAT_TOKEN') }}"
+      catalog: "{{ env_var('DEV_CATALOG', 'bronze_production') }}"
       schema: elementary
+      http_path: "{{ env_var('DEV_HTTP_PATH') }}"
+
+    ci:
+      <<: *base_auth
+      catalog: "{{ env_var('CI_CATALOG', 'bronze_production') }}"
+      schema: elementary
+      http_path: "{{ env_var('CI_HTTP_PATH') }}"
 
     staging:
-      <<: *staging_service_account
-      catalog:
+      <<: *base_auth
+      catalog: "{{ env_var('STAGING_CATALOG', 'bronze_production') }}"
       schema: elementary
+      http_path: "{{ env_var('STAGING_HTTP_PATH') }}"
+
+    production:
+      <<: *base_auth
+      catalog: "{{ env_var('PROD_CATALOG', 'bronze_production') }}"
+      schema: elementary
+      http_path: "{{ env_var('PROD_HTTP_PATH') }}"

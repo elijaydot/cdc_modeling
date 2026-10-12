@@ -2,18 +2,33 @@ version: 2
 
 models:
   - name: fct_facebook_ads_stats_daily
-    description: "Facebook ad stats"
+    description: >
+      Supporting Facebook-only daily performance fact containing spend,
+      impressions, and clicks. Grain: one row per ad_id + ad_date.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - ad_id
-            - ad_date
- 
-    #config:
-    #  contract:
-    #    enforced: true
+          arguments:
+            combination_of_columns:
+              - ad_id
+              - ad_date
 
     columns:
       - name: ad_id
-        description: "The unique identifier for each ad detail record"
+        description: Facebook ad identifier
         data_type: string
+        tests:
+          - not_null
+
+      - name: ad_date
+        description: Performance date
+        tests:
+          - not_null
+
+      - name: ad_spend
+        description: Amount spent on the ad on that day
+
+      - name: ad_impressions
+        description: Number of impressions generated on that day
+
+      - name: ad_clicks
+        description: Number of clicks generated on that day
