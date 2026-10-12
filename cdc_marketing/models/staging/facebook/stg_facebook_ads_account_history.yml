@@ -1,9 +1,28 @@
 version: 2
 models:
   - name: stg_facebook_ads_account_history
-    description: Facebook platform account model
+    description: >
+      Cleaned Facebook advertising account history.
+      Grain: one row per account_id + account_updated_at.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - account_id
-            - account_updated_at
+          arguments:
+            combination_of_columns:
+              - account_id
+              - account_updated_at
+    columns:
+      - name: account_id
+        description: Facebook advertising account identifier
+        tests:
+          - not_null
+
+      - name: account_name
+        description: Facebook advertising account name
+
+      - name: ad_currency_code
+        description: Currency used for account-level advertising spend
+
+      - name: account_updated_at
+        description: Timestamp when this account version was updated
+        tests:
+          - not_null

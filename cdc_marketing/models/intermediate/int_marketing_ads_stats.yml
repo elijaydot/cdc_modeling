@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: int_marketing_ads_stats
+    description: >
+      Cross-platform daily ad performance stats.
+      Snapchat country-level data is aggregated to ad + day
+      so both platforms share the same grain.
+      Grain: one row per platform + ad_id + date.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - platform
+              - ad_id
+              - date_day
+    columns:
+      - name: ad_id
+        description: Ad identifier (platform-specific)
+        tests:
+          - not_null
+
+      - name: date_day
+        description: Performance date
+        tests:
+          - not_null
+
+      - name: platform
+        description: Advertising platform
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['facebook', 'snapchat']
+
+      - name: spend
+        description: Amount spent
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: impressions
+        description: Number of impressions
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: clicks
+        description: Number of clicks
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"

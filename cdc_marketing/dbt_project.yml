@@ -32,5 +32,13 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   cdc_marketing:
     # Config indicated by + and applies to all files under models/example/
-    example:
+    staging:
       +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
+      
+  # Force Elementary models into their own schema
+  elementary:
+    +schema: elementary

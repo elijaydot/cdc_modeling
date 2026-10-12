@@ -1,9 +1,25 @@
 version: 2
 models:
   - name: stg_facebook_ads_ad_set_history
-    description: Facebook ad set history
+    description: >
+      Cleaned Facebook ad group history.
+      Grain: one row per ad_group_id + ad_group_updated_at.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - ad_group_id
-            - ad_group_updated_at
+          arguments:
+            combination_of_columns:
+              - ad_group_id
+              - ad_group_updated_at
+    columns:
+      - name: ad_group_id
+        description: Facebook ad group identifier
+        tests:
+          - not_null
+
+      - name: ad_group_name
+        description: Facebook ad group name
+
+      - name: ad_group_updated_at
+        description: Timestamp when this ad group version was updated
+        tests:
+          - not_null

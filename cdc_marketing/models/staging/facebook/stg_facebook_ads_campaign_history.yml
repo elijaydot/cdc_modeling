@@ -1,9 +1,25 @@
 version: 2
 models:
   - name: stg_facebook_ads_campaign_history
-    description: Facebook campaign history
+    description: >
+      Cleaned Facebook campaign history.
+      Grain: one row per campaign_id + campaign_updated_at.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - campaign_id
-            - campaign_updated_at
+          arguments:
+            combination_of_columns:
+              - campaign_id
+              - campaign_updated_at
+    columns:
+      - name: campaign_id
+        description: Facebook campaign identifier
+        tests:
+          - not_null
+
+      - name: campaign_name
+        description: Facebook campaign name
+
+      - name: campaign_updated_at
+        description: Timestamp when this campaign version was updated
+        tests:
+          - not_null

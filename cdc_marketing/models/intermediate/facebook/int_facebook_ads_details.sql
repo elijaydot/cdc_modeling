@@ -1,5 +1,12 @@
 /*
-    Tables
+    Intermediate model: Facebook Ads details
+
+    Purpose:
+    - Select the latest version of each ad, ad group, campaign and account
+    - Join the marketing hierarchy
+    - Produce a clean, denormalised ad-level dimension
+
+    Grain: one row per ad_id
 */
 
 WITH all_ads AS (
@@ -37,17 +44,14 @@ all_campaigns AS (
 
 account_details AS (
 
-    SELECT * FROM {{ ref('stg_facebook_ads_account_history') }}
+    SELECT *
+    FROM {{ ref('stg_facebook_ads_account_history') }}
     QUALIFY ROW_NUMBER() OVER (
         PARTITION BY account_id
         ORDER BY account_updated_at DESC
     ) = 1
 
 ),
-
-/*
-    Transformations
-*/
 
 join_all_details AS (
 
@@ -62,49 +66,38 @@ join_all_details AS (
             all_campaigns.campaign_updated_at,
             account_details.account_created_at
         ) AS ad_detail_updated_at
-    FROM
-        all_ads
-    LEFT JOIN
-        ad_groups
-        ON
-            all_ads.ad_group_id = ad_groups.ad_group_id
-    LEFT JOIN
-        all_campaigns
-        ON
-            all_ads.campaign_id = all_campaigns.campaign_id
-    LEFT JOIN
-        account_details
-        ON
-            all_ads.account_id = account_details.account_id
+    FROM all_ads
+    LEFT JOIN ad_groups
+        ON all_ads.ad_group_id = ad_groups.ad_group_id
+    LEFT JOIN all_campaigns
+        ON all_ads.campaign_id = all_campaigns.campaign_id
+    LEFT JOIN account_details
+        ON all_ads.account_id = account_details.account_id
 
 ),
-
-
-/*
-    Formatted
-*/
 
 formatted AS (
 
     SELECT
         ad_id,
-
-        -- FK
         ad_group_id,
         campaign_id,
         account_id,
-        
+
         -- Details
         ad_name,
         ad_group_name,
         campaign_name,
         account_name,
-        'Paid Social' AS channel_name,
+
+        -- Standard fields
+        'Paid Social'           AS channel_name,
+        'facebook'              AS platform,          -- ← added
+        'facebook_ads'          AS data_src,
+
         -- Metadata
-        ad_detail_updated_at,
-        'facebook_ads' AS data_src
-    FROM
-        join_all_details
+        ad_detail_updated_at
+    FROM join_all_details
 
 )
 

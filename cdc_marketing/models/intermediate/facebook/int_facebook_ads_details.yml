@@ -2,16 +2,27 @@ version: 2
 
 models:
   - name: int_facebook_ads_details
-    description: Facebook ad details
+    description: >
+      Facebook ads joined with their ad group, campaign and account.
+      Grain: one row per ad_id.
     columns:
       - name: ad_id
-        data_tests:
+        description: Facebook ad identifier
+        tests:
           - not_null
           - unique
 
       - name: channel_name
-        data_tests:
+        description: Marketing channel
+        tests:
           - not_null
           - accepted_values:
-              values:
-                - Paid Social
+              arguments:
+                values: ['Paid Social']
+
+      - name: platform
+        description: Advertising platform
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['facebook']

@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: snapchat_ads
+    database: bronze_production
+    schema: cdc_staging
+    description: Raw Snapchat Ads data loaded into the Bronze layer.
+    config:
+      enabled: true
+      meta:
+        owner: "@cde_engineer"
+      freshness:
+        warn_after:
+          count: 2
+          period: day
+
+    tables:
+      - name: snapchat_ads_stats
+        description: Daily performance metrics (spend, impressions, clicks) at ad level from Snapchat.
+        columns:
+          - name: ad_detail_id
+            description: Unique identifier for the ad detail record (join key to ads table).
+          - name: ad_date
+            description: Performance date.
+        config:
+          event_time: ad_date
+
+      - name: snapchat_ads_campaign
+        description: Snapchat campaign dimension / history.
+        config:
+          event_time: null   # no updated_at column in this table
+
+      - name: snapchat_ads_adgroup
+        description: Snapchat ad group (ad set) history.
+        config:
+          event_time: ad_group_updated_at
+
+      - name: snapchat_ads
+        description: Snapchat ad history / details.
+        config:
+          event_time: ad_detail_updated_at

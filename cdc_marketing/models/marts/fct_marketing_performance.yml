@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: fct_marketing_performance
+    description: >
+      Unified marketing performance fact table.
+      Combines Facebook and Snapchat daily ad metrics with key descriptive attributes
+      and standard KPIs (CTR, CPC, CPM).
+      Grain: one row per platform + ad_id + date.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - platform
+              - ad_id
+              - date_day
+    columns:
+      - name: date_day
+        description: Performance date
+        tests:
+          - not_null
+
+      - name: platform
+        description: Advertising platform (facebook or snapchat)
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['facebook', 'snapchat']
+
+      - name: ad_id
+        description: Ad identifier
+        tests:
+          - not_null
+
+      - name: spend
+        description: Amount spent
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: impressions
+        description: Number of impressions
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: clicks
+        description: Number of clicks
+        tests:
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: ctr
+        description: Click-through rate (clicks / impressions)
+
+      - name: cpc
+        description: Cost per click (spend / clicks)
+
+      - name: cpm
+        description: Cost per thousand impressions (spend / impressions * 1000)

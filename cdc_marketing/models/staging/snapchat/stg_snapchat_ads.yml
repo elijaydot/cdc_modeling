@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_snapchat_ads
+    description: Cleaned Snapchat ad dimension.
+    columns:
+      - name: ad_id
+        description: Snapchat ad identifier
+        tests:
+          - not_null
+          - unique
+
+      - name: ad_group_id
+        description: >
+          Parent ad group identifier. The provided source extract contains some
+          ads whose parent ad group is absent, so this relationship is not
+          enforced and the intermediate model preserves those ads with a left join.
+
+      - name: ad_name
+        description: Ad name
+
+      - name: ad_detail_updated_at
+        description: Last update timestamp of the ad detail
+
+      - name: platform
+        description: Advertising platform
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapchat']

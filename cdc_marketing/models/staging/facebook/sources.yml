@@ -1,7 +1,7 @@
 sources:
   - name: facebook_ads
     database: bronze_production
-    description: data from  facebook plaform (static)
+    description: Raw Facebook Ads data loaded into the Bronze layer.
     schema: cdc_staging
     config:
       enabled: true 
@@ -14,31 +14,31 @@ sources:
 
     tables:
       - name: campaigns
-        description: campaign data from  facebook plaform (static)
+        description: Facebook campaign history, including names and update timestamps.
         config:
           enabled: true
           event_time: campaign_updated_at
 
       - name: adgroups
-        description: adgroups data from  facebook plaform (static)
+        description: Facebook ad group history, including names and update timestamps.
         config:
           enabled: true
           event_time: ad_group_updated_at
       
       - name: ads
-        description: ads data from  facebook plaform (static)
+        description: Facebook ad history and hierarchy identifiers.
         config:
           enabled: true
           event_time: ad_updated_at
       
       - name: accounts
-        description: accounts data from  facebook plaform (static)
+        description: Facebook advertising account history and account attributes.
         config:
           enabled: true
           event_time: account_updated_at
       
       - name: ads_stats
-        description: ads stats on spend, clicks and impression data from  facebook plaform (static)
+        description: Daily Facebook ad spend, impression, and click metrics.
         config:
           enabled: true
           event_time: ad_date

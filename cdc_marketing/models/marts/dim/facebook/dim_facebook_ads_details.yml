@@ -2,15 +2,40 @@ version: 2
 
 models:
   - name: dim_facebook_ads_details
-    description: "Ad details across all sources"
-    #config:
-    #  contract:
-    #    enforced: true
-    
+    description: >
+      Consumer-ready Facebook ad dimension containing the latest ad, ad group,
+      campaign, and account attributes. Grain: one row per ad_id.
     columns:
       - name: ad_id
-        description: "The unique identifier for each ad detail record"
+        description: Unique Facebook ad identifier
         data_type: string
         data_tests:
           - not_null
           - unique
+
+      - name: ad_group_id
+        description: Parent Facebook ad group identifier
+
+      - name: campaign_id
+        description: Parent Facebook campaign identifier
+
+      - name: account_id
+        description: Parent Facebook advertising account identifier
+
+      - name: ad_name
+        description: Facebook ad name
+
+      - name: ad_group_name
+        description: Facebook ad group name
+
+      - name: campaign_name
+        description: Facebook campaign name
+
+      - name: account_name
+        description: Facebook advertising account name
+
+      - name: channel_name
+        description: Normalized marketing channel
+
+      - name: platform
+        description: Advertising platform, always facebook in this model
