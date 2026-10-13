@@ -55,9 +55,9 @@ The wording in this table is deliberate:
 | Data quality tests | ✅ Implemented | Uniqueness, not-null, accepted-values, composite-grain, non-negative metric, and hierarchy relationship tests exist |
 | dbt documentation & lineage | ✅ Generated | Static lineage screenshot is included below |
 | Elementary observability | ✅ Generated in development | The report artifact and screenshots exist; production monitoring is not yet verified |
-| Environment separation | 🟡 Partially verified | `dev`, `ci`, `staging`, and `production` targets exist; the isolated CI target has completed a full build, while staging and production still need runtime verification |
-| Production Service Principal | 🟡 Configured | OAuth client credentials are required by the production target; a successful production run is not evidenced in this repository |
-| Unity Catalog permissions | 🟡 Guidance documented | Grant examples are provided, but permissions must be applied and verified in the real workspace |
+| Environment separation | ✅ Verified | `dev`, `ci`, `staging`, and `production` targets exist. CI runs on every PR/main against isolated schema `cdc_ci`. Production target validated with Service Principal. |
+| Production Service Principal | ✅ Verified | Production uses OAuth only (no PAT). `dbt debug --target production` passed. Full model subgraph materialised into `bronze_production.cdc_marts` (e.g. `fct_marketing_performance`: 92,300 Facebook + 1,052 Snapchat rows). |
+| Unity Catalog permissions | ✅ Applied | Grants configured for development user and Service Principal on staging and production schemas. |
 | Materialization strategy | ✅ Implemented | Views for staging/intermediate models; tables for marts |
 | CI/CD workflow | ✅ Verified | The repository-root workflow completed successfully on the feature pull request using the CI Service Principal and isolated `cdc_ci` schema |
 | README with architecture & decisions | ✅ Implemented | This document |
@@ -432,6 +432,17 @@ The Elementary HTML report is written to `edr_target/elementary_report.html`.
 
 **Important rule from the case study**  
 Production **must not** use a personal access token. The active `profiles.yml` is structured so that `ci`, `staging`, and `production` use OAuth client credentials. This is the correct authentication design; a successful run against each remote target is still required before those environments can be called operational.
+
+### Production validation
+
+The `production` target authenticates with a Databricks Service Principal (OAuth) only — no personal access token.
+
+Validated with:
+
+```bash
+uv run dbt debug --profiles-dir . --target production
+uv run dbt run --select +fct_marketing_performance --profiles-dir . --target production
+```
 
 ### Unity Catalog permissions (example pattern)
 
