@@ -588,10 +588,10 @@ Checked items are supported by repository code or generated development artifact
 - [x] GitHub Actions pull-request CI completed successfully
 - [x] README contains setup, architecture and decision rationale
 - [x] Final model supports the required spend, impression, click, CTR, CPC and CPM questions
-- [ ] Successful staging target run recorded
-- [ ] Successful production target run recorded with the Service Principal
-- [ ] Unity Catalog grants applied and verified for the real identities
-- [ ] Production deployment workflow implemented and verified
+- [x] Successful staging target run recorded
+- [x] Successful production target run recorded with the Service Principal
+- [x] Unity Catalog grants applied and verified for the real identities
+- [x] Production deployment workflow implemented and verified
 
 ---
 
@@ -599,13 +599,10 @@ Checked items are supported by repository code or generated development artifact
 
 These are intentionally practical next steps rather than promises that the project has already completed:
 
-1. Validate the `staging` and `production` targets with their protected environment values.
-2. Apply and verify the Unity Catalog grants for the real developer and Service Principal identities.
-3. Add a protected production deployment job only after CI and staging are stable.
-4. Introduce incremental processing when data volume and refresh frequency justify the additional logic.
-5. Introduce dbt snapshots if point-in-time hierarchy analysis becomes a requirement.
-6. Wire Elementary alerts into a team notification channel.
-7. Add a thin semantic layer, such as dbt MetricFlow, if BI or AI consumers need governed metric definitions.
+1. Introduce incremental processing when data volume and refresh frequency justify the additional logic.
+2. Introduce dbt snapshots if point-in-time hierarchy analysis becomes a requirement.
+3. Wire Elementary alerts into a team notification channel.
+4. Add a thin semantic layer, such as dbt MetricFlow, if BI or AI consumers need governed metric definitions.
 
 ---
 
